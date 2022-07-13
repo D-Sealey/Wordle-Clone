@@ -1,0 +1,184 @@
+'''
+TODO:
+-User chosen word length #-DONE?
+-Display remaining in word list #-DONE?
+-print_alpha shows '-','*' and upper for letters
+-make word list, answer and answer list global?
+'''
+
+#----------
+'Wordle'
+def play_wordle():
+  import random
+  import re
+  
+  
+  #---Create Word list
+  #---
+  def create_wordlist():    
+    'Made with SOWPODS'
+    import requests
+    url='http://norvig.com/ngrams/sowpods.txt'
+    r=requests.get(url)
+    sowpods=r.text
+    return sowpods.casefold().split('\n')
+  # word_list=create_wordlist()  
+  '---'
+  
+  def word_count(word_list=create_wordlist()):
+    '''Displays length of words and associated counts in word list'''
+    from collections import Counter
+    counts=Counter([len(word) for word in word_list])
+    # print(counts)
+    for length,count in sorted(counts.items()):
+      print(length,count)
+  '---'
+  word_count()
+  #---
+  # L=input('How long of a word? ')
+  L=5
+  #---
+  def pick_answer(L=5, word_list=create_wordlist()):
+    '''Create list of words and pick one as answer'''
+    answers=[word for word in word_list if len(word)==L]
+    print(f'{len(answers)} potential {L}-letter words.')
+    return random.choice(answers)
+  # puzzle='sprig'  
+  '---'
+  #---
+  def make_guess(L=5,word_list=create_wordlist()):
+    '''Ask user for guess and verify appropriate'''
+    guess=input(f'Guess a {L}-letter word: ')
+    while len(guess)!=L:
+      print(f'Must be {L} letters')
+      guess=make_guess(L)
+    if guess not in word_list:
+      print('Not in word list')
+      guess=make_guess(L)
+    return guess.casefold()   
+  # print(guess)
+  # guess='slide'
+  
+  '---'
+  #---
+  def print_alpha(guess='',check='',alpha=list('abcdefghijklmnopqrstuvwxyz')):
+    '''Prints letters to choose from'''
+    for ltr in guess:
+      # print(ltr)
+      if ltr in alpha:
+        # print(alpha.index(ltr))
+        alpha[alpha.index(ltr)]='-'
+        
+    '''    
+    #--need to fix
+    for pos, ltr in enumerate(check):
+      if ltr=='-' or ltr=='*':
+        alpha[alpha.index(guess[pos])]=ltr
+      elif ltr.isalpha():
+        alpha[alpha.index(guess[pos])]=ltr.upper()
+    '''
+    
+    print(alpha)
+    return True
+  print_alpha()  
+  '---'
+  #---
+  def check_guess(guess,puzzle):
+    '''Compare guess to puzzle
+    --Not currently used--'''
+    check=[]
+    for position, letter in enumerate(guess):
+      if letter in puzzle:
+        if letter==puzzle[position]:
+          check.append(letter)
+        else:
+          check.append('*')
+      else:
+        check.append('-')
+    print(check)    
+    return guess, check
+  '---'
+  #---
+  #-make these global so they carry over after each call of words_remaining
+  not_in=set()
+  contains=set()
+  regex=[]
+  for i in range(L):
+    regex.append('\w')
+  def words_remaining(guess='',check='',L=5,word_list=create_wordlist()):
+    '''Build regex from guesses, check against word list and display count of potential words'''
+    
+    answers=[word for word in word_list if len(word)==L]  
+
+    #-build sets of guessed letters in and not in word
+    for pos, ele in enumerate(check):
+      if ele == '-':        
+        not_in.add(guess[pos])
+      elif ele =='*':
+        contains.add(guess[pos])
+      else:
+        regex.pop(pos)
+        regex.insert(pos,ele)
+        
+    #-remove words
+    for l in not_in:
+      #-elimnated letters
+      answers=[word for word in answers if word.count(l)==0]
+    for l in contains:
+      #-letter somewhere in word
+      answers=[word for word in answers if l in word]
+    #-run regex on list for exact letter placement
+    #-regex only works on string so joined the list space separated 
+    test=' '.join(answers)
+    exact=''.join(regex)
+    answers=re.findall(exact,test)
+    
+    # print(f'Removed: {not_in}')
+    # print(f'Contains: {contains}')
+    print(f'Exact: {regex}')    
+    # print(f'After regex: {len(pot)}')
+    
+    print(f'{len(answers)} words remain in list.')
+    
+    pass
+  words_remaining()
+  '---'
+  #---
+  def play():
+    # word_list=create_wordlist()
+    puzzle=pick_answer(L)
+    print(f'Solution is: {puzzle}') #for testing
+    guess=make_guess(L)
+    # print(guess)
+    while guess!=puzzle:
+      check=[]
+      for position, letter in enumerate(guess):
+        if letter in puzzle:
+          if letter==puzzle[position]:
+            check.append(letter)
+          else:
+            check.append('*')
+        else:
+          check.append('-')
+      # print('\n'*30)   
+      # check_guess(guess,puzzle)
+      print_alpha(guess,check) 
+      print(list(guess))
+      # check_guess(guess,puzzle)
+      print(check)
+      words_remaining(guess, check)
+      
+      guess=make_guess()
+      
+    print('You Win!')
+  '---'
+
+  #---Play game
+  #---
+  play()
+  '---'
+  # return True
+''  
+# play_wordle()
+'/Wordle'
+#----------
