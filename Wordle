@@ -72,7 +72,8 @@ def words_remaining(word_list,L,guess,check):
   answers=word_list
 
   '''['g*', 'r*', 'e*', '-', 'T']
-['egret', 'greet']'''
+['egret', 'greet']
+  build regex with [^g] except g'''
   
   #---build sets of guessed letters in and not in word
   for pos, ele in enumerate(check):
@@ -99,7 +100,8 @@ def words_remaining(word_list,L,guess,check):
   exact=''.join(regex)
   answers=re.findall(exact,test)
 
-  print(answers)
+  '''Turn on for list of remaining words'''
+  # print(answers)
   return len(answers)
 '---'
   
@@ -109,11 +111,13 @@ all_words=create_wordlist()
 # L=input('Select word length: ')
 L=5
 potential_words=limit_words(all_words,L)
-# print(f'{len(potential_words)} potential {L}-letter words.')
+print(f'{len(potential_words)} potential {L}-letter words.')
 #-fast enough to get len() again rather than pull from Counter
-# answer=pick_answer(potential_words)
-answer='lilac'
-print(answer)
+
+answer=pick_answer(potential_words)
+# answer='coyly'
+# answer='boozy'
+# print(answer)
 guess=''
 
 #---make these global so they carry over after each call of words_remaining
@@ -134,5 +138,6 @@ while True:
   check=check_guess(guess,answer)
   num_remain=words_remaining(potential_words,L,guess,check)
   print(f'{num_remain} potential words remain.')
+''
 
 print('YOU WIN!')
